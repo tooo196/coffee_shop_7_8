@@ -1,0 +1,248 @@
+{# Шаблон страницы "О нас" #}
+{% extends 'base.html' %}
+{% load static %}
+
+{# Заголовок страницы #}
+{% block title %}О нас - Coffee Shop{% endblock %}
+
+{# Основное содержимое страницы #}
+{% block content %}
+    {# Хедер страницы с заголовком и хлебными крошками #}
+    <div class="bg-light py-5 mb-5">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}">Главная</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">О нас</li>
+                </ol>
+            </nav>
+            <h1 class="display-4 mb-0">О нашей кофейне</h1>
+        </div>
+    </div>
+
+    {# Основной контент #}
+    <div class="container">
+        {# О компании #}
+        <section class="row align-items-center mb-5">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <img src="{% static 'img/about-1.jpg' %}" alt="Наша кофейня" class="img-fluid rounded shadow"/>
+            </div>
+            <div class="col-lg-6">
+                <h2 class="mb-4">Наша история</h2>
+                <p class="lead">С 2010 года мы дарим нашим гостям настоящий кофейный вкус и уютную атмосферу.</p>
+                <p>Всё началось с маленькой кофейни в центре города, где мы впервые поделились своей страстью к кофе. Сегодня Coffee Shop - это сеть уютных заведений, где каждый может насладиться чашкой идеально приготовленного кофе.</p>
+                <p>Мы тщательно отбираем лучшие сорта кофейных зёрен со всего мира и обжариваем их с любовью и профессионализмом.</p>
+                
+                {# Преимущества #}
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <div class="me-3 text-primary">
+                                <i class="fas fa-coffee fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="h6 mb-1">Свежая обжарка</h5>
+                                <p class="small text-muted mb-0">Обжариваем зерна каждую неделю</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <div class="me-3 text-primary">
+                                <i class="fas fa-leaf fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="h6 mb-1">Экологично</h5>
+                                <p class="small text-muted mb-0">Используем биоразлагаемую упаковку</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# Наша миссия #}
+        <section class="py-5 bg-light rounded-3 mb-5">
+            <div class="container">
+                <div class="row justify-content-center text-center">
+                    <div class="col-lg-8">
+                        <span class="text-muted text-uppercase small">Наша миссия</span>
+                        <h2 class="mb-4">Дарить радость от каждой чашки кофе</h2>
+                        <p class="lead mb-0">Мы верим, что отличный кофе - это не просто напиток, а целая философия. Наша цель - делиться с вами лучшими сортами кофе, создавая неповторимый вкус и атмосферу в каждом нашем заведении.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# Наша команда #}
+        <section class="mb-5">
+            <div class="text-center mb-5">
+                <h2>Наша команда</h2>
+                <p class="lead text-muted">Профессионалы, влюбленные в кофе</p>
+            </div>
+            
+            <div class="row g-4">
+                {# Член команды 1 #}
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <img src="{% static 'img/team-1.jpg' %}" class="card-img-top" alt="Анна Петрова">
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-1">Анна Петрова</h5>
+                            <p class="text-muted small">Главный бариста</p>
+                            <p class="card-text small">Сертифицированный Q-грейдер с 8-летним опытом работы в кофейной индустрии.</p>
+                            <div class="mt-3">
+                                <a href="#" class="text-muted me-2"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="text-muted"><i class="fab fa-facebook"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {# Член команды 2 #}
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <img src="{% static 'img/team-2.jpg' %}" class="card-img-top" alt="Иван Сидоров">
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-1">Иван Сидоров</h5>
+                            <p class="text-muted small">Шеф-бариста</p>
+                            <p class="card-text small">Победитель национального чемпионата бариста 2022 года.</p>
+                            <div class="mt-3">
+                                <a href="#" class="text-muted me-2"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="text-muted"><i class="fab fa-facebook"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {# Член команды 3 #}
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <img src="{% static 'img/team-3.jpg' %}" class="card-img-top" alt="Мария Иванова">
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-1">Мария Иванова</h5>
+                            <p class="text-muted small">Управляющая</p>
+                            <p class="card-text small">Более 10 лет опыта в управлении заведениями общепита.</p>
+                            <div class="mt-3">
+                                <a href="#" class="text-muted me-2"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="text-muted"><i class="fab fa-facebook"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# Отзывы клиентов #}
+        <section class="py-5 bg-light rounded-3 mb-5">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2>Что говорят наши гости</h2>
+                    <p class="lead text-muted">Мнения тех, кто уже попробовал наш кофе</p>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-white shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="mb-3 text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <p class="card-text mb-4">"Лучший капучино в городе! Всегда свежеобжаренные зерна и идеальное молоко. Рекомендую всем ценителям кофе."</p>
+                                <div class="d-flex align-items-center">
+                                    <img src="{% static 'img/avatar.jpg' %}" class="rounded-circle me-3" width="50" height="50" alt="Алексей">
+                                    <div>
+                                        <h6 class="mb-0">Алексей</h6>
+                                        <small class="text-muted">Постоянный клиент</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-white shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="mb-3 text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <p class="card-text mb-4">"Отличное место для работы. Быстрый Wi-Fi, вкусный кофе и уютная атмосфера. Часто прихожу сюда с ноутбуком."</p>
+                                <div class="d-flex align-items-center">
+                                    <img src="{% static 'img/avatar.jpg' %}" class="rounded-circle me-3" width="50" height="50" alt="Елена">
+                                    <div>
+                                        <h6 class="mb-0">Елена</h6>
+                                        <small class="text-muted">Частый гость</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-white shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="mb-3 text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <p class="card-text mb-4">"Обожаю их выпечку! Особенно круассаны с миндальной начинкой. Персонал всегда приветливый и вежливый."</p>
+                                <div class="d-flex align-items-center">
+                                    <img src="{% static 'img/avatar.jpg' %}" class="rounded-circle me-3" width="50" height="50" alt="Дмитрий">
+                                    <div>
+                                        <h6 class="mb-0">Дмитрий</h6>
+                                        <small class="text-muted">Гурман</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}
+
+{# Дополнительные стили #}
+{% block extra_css %}
+<style>
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+    
+    .card {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .img-hover-zoom {
+        overflow: hidden;
+    }
+    
+    .img-hover-zoom img {
+        transition: transform 0.5s ease;
+    }
+    
+    .img-hover-zoom:hover img {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Вход в аккаунт' %}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">{% trans 'Вход в аккаунт' %}</h2>
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {% trans 'Неверное имя пользователя или пароль. Пожалуйста, попробуйте снова.' %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">{% trans 'Имя пользователя' %}</label>
+                            <input type="text" name="username" class="form-control" id="id_username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">{% trans 'Пароль' %}</label>
+                            <input type="password" name="password" class="form-control" id="id_password" required>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">{% trans 'Войти' %}</button>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-3 text-center">
+                        <a href="{% url 'accounts:password_reset' %}">{% trans 'Забыли пароль?' %}</a>
+                        <br>
+                        <span>{% trans 'Нет аккаунта?' %} <a href="{% url 'accounts:register' %}">{% trans 'Зарегистрируйтесь' %}</a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

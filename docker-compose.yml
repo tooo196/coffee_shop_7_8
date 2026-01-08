@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:18
+    container_name: coffee_postgres
+    environment:
+      POSTGRES_DB: coffee_shop
+      POSTGRES_USER: coffee_user
+      POSTGRES_PASSWORD: coffee_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U coffee_user" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: coffee_shop_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  web:
+    build: .
+    container_name: coffee_shop_web
+    command: >
+     sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8002"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8002:8002"
+    depends_on:
+      redis:
+          condition: service_started
+      db:
+        condition: service_healthy
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-gnyankbr5(8zu3u!$1996czbu5en2stm#eobw2oeymzmmj2g=c
+      - DB_HOST=db
+      - DB_PORT=5432
+      - POSTGRES_DB=coffee_shop
+      - POSTGRES_USER=coffee_user
+      - POSTGRES_PASSWORD=coffee_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

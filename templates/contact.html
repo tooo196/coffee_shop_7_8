@@ -1,0 +1,72 @@
+{# Шаблон страницы контактов, наследуется от базового шаблона #}
+{% extends 'base.html' %}
+
+{% block content %}
+    {# Основной контейнер страницы #}
+    <div class="container mt-5">
+        <h1>Свяжитесь с нами</h1>
+        
+        {# Сетка Bootstrap для расположения контента в две колонки #}
+        <div class="row">
+            {# Левая колонка с контактной информацией #}
+            <div class="col-md-6">
+                <h3>Наш адрес</h3>
+                <p>Улица Кофейная, 123<br>
+                    Город, Страна</p>
+
+                <h3>Контактная информация</h3>
+                <p>
+                    <i class="fas fa-phone"></i> +7 (123) 456-78-90<br>
+                    <i class="fas fa-envelope"></i> info@coffeeshop.ru
+                </p>
+                
+                <h3>Часы работы</h3>
+                <p>
+                    Пн-Пт: 8:00 - 22:00<br>
+                    Сб-Вс: 9:00 - 23:00
+                </p>
+            </div>
+            
+            {# Правая колонка с формой обратной связи #}
+            <div class="col-md-6">
+                <h3>Написать нам</h3>
+                {# Форма для отправки сообщения #}
+                <form method="post" action="{% url 'contact' %}">
+                    {% csrf_token %}
+                    
+                    {# Поле для имени #}
+                    <div class="mb-3">
+                        <input type="text" 
+                               class="form-control" 
+                               name="name" 
+                               placeholder="Ваше имя" 
+                               required>
+                    </div>
+                    
+                    {# Поле для email #}
+                    <div class="mb-3">
+                        <input type="email" 
+                               class="form-control" 
+                               name="email" 
+                               placeholder="Ваш email" 
+                               required>
+                    </div>
+                    
+                    {# Текстовое поле для сообщения #}
+                    <div class="mb-3">
+                        <textarea class="form-control" 
+                                 name="message" 
+                                 rows="5" 
+                                 placeholder="Ваше сообщение" 
+                                 required></textarea>
+                    </div>
+                    
+                    {# Кнопка отправки формы #}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Отправить сообщение
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
