@@ -1,0 +1,105 @@
+{% extends 'orders/base.html' %}
+{% load static %}
+
+{% block head_title %}Заказ оформлен{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item active" aria-current="page">Заказ оформлен</li>
+{% endblock %}
+
+{% block page_title %}Спасибо за заказ!{% endblock %}
+
+{% block order_content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <div class="card border-0">
+            <div class="card-body p-5">
+                <div class="mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="#28a745" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                    </svg>
+                </div>
+                <h2 class="mb-3">Ваш заказ успешно оформлен!</h2>
+                <p class="lead mb-4">Номер вашего заказа: <strong>#{{ order.id }}</strong></p>
+                <p class="mb-4">Мы отправили подтверждение заказа на вашу электронную почту <strong>{{ order.email }}</strong>.</p>
+                
+                <div class="card mb-4">
+                    <div class="card-body text-start">
+                        <h5 class="card-title mb-3">Детали заказа</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Дата заказа:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+                                <p class="mb-1"><strong>Статус:</strong> {{ order.get_status_display }}</p>
+                                <p class="mb-1"><strong>Способ оплаты:</strong> {{ order.get_payment_method_display }}</p>
+                                <p class="mb-0"><strong>Сумма заказа:</strong> {{ order.get_total_cost }} ₽</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Получатель:</strong> {{ order.first_name }} {{ order.last_name }}</p>
+                                <p class="mb-1"><strong>Телефон:</strong> {{ order.phone }}</p>
+                                <p class="mb-0"><strong>Адрес доставки:</strong> {{ order.postal_code }}, {{ order.country }}, {{ order.city }}, {{ order.address }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'products:product_list' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Вернуться в магазин
+                    </a>
+                    <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-primary">
+                        <i class="bi bi-receipt"></i> Детали заказа
+                    </a>
+                </div>
+                
+                <div class="mt-5">
+                    <h5>Что дальше?</h5>
+                    <div class="row mt-3">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="bi bi-envelope fs-1 text-primary"></i>
+                                    </div>
+                                    <h6>Проверьте почту</h6>
+                                    <p class="small text-muted">Мы отправили подтверждение заказа на вашу электронную почту</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="bi bi-clock-history fs-1 text-primary"></i>
+                                    </div>
+                                    <h6>Статус заказа</h6>
+                                    <p class="small text-muted">Отслеживайте статус вашего заказа в личном кабинете</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="bi bi-headset fs-1 text-primary"></i>
+                                    </div>
+                                    <h6>Нужна помощь?</h6>
+                                    <p class="small text-muted">Наши операторы всегда готовы помочь по телефону или в чате</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Обновляем корзину в localStorage
+    if (typeof(Storage) !== 'undefined') {
+        localStorage.removeItem('cart');
+    }
+</script>
+{% endblock %}

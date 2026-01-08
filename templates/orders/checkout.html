@@ -1,0 +1,108 @@
+{% extends 'orders/base.html' %}
+{% load static %}
+
+{% block head_title %}Оформление заказа{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'cart:cart_detail' %}">Корзина</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Оформление заказа</li>
+{% endblock %}
+
+{% block page_title %}Оформление заказа{% endblock %}
+
+{% block order_content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Ваши данные</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" id="checkout-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">Имя</label>
+                            <input type="text" class="form-control" id="first_name" value="{{ user.first_name }}" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Фамилия</label>
+                            <input type="text" class="form-control" id="last_name" value="{{ user.last_name }}" disabled>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон</label>
+                        <input type="tel" class="form-control" id="phone" value="{{ user.phone|default:'' }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Адрес доставки</label>
+                        <textarea class="form-control" id="address" rows="3" disabled>{{ user.address|default:'' }}</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="postal_code" class="form-label">Почтовый индекс</label>
+                            <input type="text" class="form-control" id="postal_code" value="{{ user.postal_code|default:'' }}" disabled>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="city" class="form-label">Город</label>
+                            <input type="text" class="form-control" id="city" value="{{ user.city|default:'' }}" disabled>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="country" class="form-label">Страна</label>
+                            <input type="text" class="form-control" id="country" value="{{ user.country|default:'' }}" disabled>
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="save_info" name="save_info" checked>
+                        <label class="form-check-label" for="save_info">
+                            Сохранить информацию для следующих заказов
+                        </label>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Подтвердить заказ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Ваш заказ</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for item in cart %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <h6 class="my-0">{{ item.product.name }}</h6>
+                                <small class="text-muted">Количество: {{ item.quantity }} × {{ item.price }} ₽</small>
+                            </div>
+                            <span class="text-muted">{{ item.total_price }} ₽</span>
+                        </li>
+                    {% endfor %}
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span>Итого</span>
+                        <strong>{{ cart.get_total_price }} ₽</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Способы оплаты</h5>
+                <p class="card-text">Оплата наличными при получении</p>
+                <p class="card-text">Банковской картой онлайн</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

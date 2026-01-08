@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Заказ' %} #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">{% trans 'Главная' %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'orders:order_list' %}">{% trans 'Мои заказы' %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% trans 'Заказ' %} #{{ order.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>{% trans 'Заказ' %} #{{ order.id }}</h1>
+                <div>
+                    <span class="badge bg-{{ order.get_status_class }} fs-6">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans 'Информация о заказе' %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>{% trans 'Данные получателя' %}</h6>
+                            <p class="mb-1">
+                                <strong>{% trans 'ФИО:' %}</strong> {{ order.get_full_name }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>{% trans 'Телефон:' %}</strong> {{ order.phone }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>{% trans 'Email:' %}</strong> {{ order.email }}
+                            </p>
+                            <p class="mb-0">
+                                <strong>{% trans 'Адрес доставки:' %}</strong> {{ order.address|default:_('Самовывоз') }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>{% trans 'Детали заказа' %}</h6>
+                            <p class="mb-1">
+                                <strong>{% trans 'Дата заказа:' %}</strong> {{ order.created_at|date:"d.m.Y H:i" }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>{% trans 'Способ доставки:' %}</strong> {{ order.get_delivery_type_display }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>{% trans 'Способ оплаты:' %}</strong> {{ order.get_payment_method_display }}
+                            </p>
+                            {% if order.comment %}
+                                <p class="mb-0">
+                                    <strong>{% trans 'Комментарий:' %}</strong> {{ order.comment }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans 'Состав заказа' %}</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{% trans 'Товар' %}</th>
+                                    <th class="text-center">{% trans 'Цена' %}</th>
+                                    <th class="text-center">{% trans 'Количество' %}</th>
+                                    <th class="text-end">{% trans 'Итого' %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if item.product.image %}
+                                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                                                         class="img-thumbnail me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                                {% else %}
+                                                    <div class="img-thumbnail me-3 d-flex align-items-center justify-content-center" 
+                                                         style="width: 60px; height: 60px; background-color: #f8f9fa;">
+                                                        <i class="bi bi-cup-hot fs-4 text-muted"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="mb-0">
+                                                        <a href="{{ item.product.get_absolute_url }}" class="text-decoration-none">
+                                                            {{ item.product.name }}
+                                                        </a>
+                                                    </h6>
+                                                    {% if item.product.category %}
+                                                        <small class="text-muted">{{ item.product.category.name }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="align-middle text-center">{{ item.price }} ₽</td>
+                                        <td class="align-middle text-center">{{ item.quantity }}</td>
+                                        <td class="align-middle text-end">{{ item.get_cost }} ₽</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>{% trans 'Подытог:' %}</strong></td>
+                                    <td class="text-end">{{ order.get_total_cost_without_delivery }} ₽</td>
+                                </tr>
+                                {% if order.delivery_cost > 0 %}
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>{% trans 'Доставка:' %}</strong></td>
+                                        <td class="text-end">{{ order.delivery_cost }} ₽</td>
+                                    </tr>
+                                {% endif %}
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>{% trans 'Итого к оплате:' %}</strong></td>
+                                    <td class="text-end"><strong>{{ order.total_amount }} ₽</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'orders:order_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> {% trans 'Вернуться к списку заказов' %}
+                </a>
+                
+                <div>
+                    {% if order.status == 'pending' or order.status == 'processing' %}
+                        <a href="{% url 'orders:order_cancel' order.id %}" 
+                           class="btn btn-outline-danger me-2"
+                           onclick="return confirm('{% trans 'Вы уверены, что хотите отменить заказ?' %}')">
+                            <i class="bi bi-x-circle"></i> {% trans 'Отменить заказ' %}
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'orders:order_invoice_pdf' order.id %}" class="btn btn-outline-primary" target="_blank">
+                        <i class="bi bi-file-earmark-pdf"></i> {% trans 'Счет на оплату' %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

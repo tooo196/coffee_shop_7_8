@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Оформление заказа' %}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">{% trans 'Главная' %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'cart:cart_detail' %}">{% trans 'Корзина' %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% trans 'Оформление заказа' %}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">{% trans 'Оформление заказа' %}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="order-form" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <h5 class="mb-3">{% trans 'Контактная информация' %}</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">{% trans 'Имя' %} *</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" 
+                                       value="{{ user.first_name }}" required>
+                                <div class="invalid-feedback">
+                                    {% trans 'Пожалуйста, укажите ваше имя' %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">{% trans 'Фамилия' %} *</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                       value="{{ user.last_name }}" required>
+                                <div class="invalid-feedback">
+                                    {% trans 'Пожалуйста, укажите вашу фамилию' %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">{% trans 'Email' %} *</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ user.email }}" required>
+                                <div class="invalid-feedback">
+                                    {% trans 'Пожалуйста, укажите корректный email' %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">{% trans 'Телефон' %} *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       value="{{ user.phone }}" required>
+                                <div class="invalid-feedback">
+                                    {% trans 'Пожалуйста, укажите ваш телефон' %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h5 class="mb-3">{% trans 'Способ доставки' %}</h5>
+                        <div class="mb-4">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="delivery_type" id="delivery_self" 
+                                       value="self" checked>
+                                <label class="form-check-label" for="delivery_self">
+                                    <strong>{% trans 'Самовывоз' %}</strong><br>
+                                    <small class="text-muted">{% trans 'г. Москва, ул. Примерная, д. 1' %}</small>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="delivery_type" id="delivery_courier" 
+                                       value="courier">
+                                <label class="form-check-label" for="delivery_courier">
+                                    <strong>{% trans 'Курьерская доставка' %}</strong><br>
+                                    <small class="text-muted">{% trans 'Доставка курьером по Москве в пределах МКАД' %}</small>
+                                </label>
+                            </div>
+                            
+                            <div id="delivery-address" class="mt-3" style="display: none;">
+                                <label for="address" class="form-label">{% trans 'Адрес доставки' %} *</label>
+                                <textarea class="form-control" id="address" name="address" rows="2">{{ user.address }}</textarea>
+                                <div class="invalid-feedback">
+                                    {% trans 'Пожалуйста, укажите адрес доставки' %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h5 class="mb-3">{% trans 'Способ оплаты' %}</h5>
+                        <div class="mb-4">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="payment_online" value="online" checked>
+                                <label class="form-check-label" for="payment_online">
+                                    <strong>{% trans 'Онлайн-оплата картой' %}</strong><br>
+                                    <small class="text-muted">{% trans 'Оплата банковской картой онлайн' %}</small>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="payment_cash" value="cash">
+                                <label class="form-check-label" for="payment_cash">
+                                    <strong>{% trans 'Наличными при получении' %}</strong><br>
+                                    <small class="text-muted">{% trans 'Оплата наличными курьеру или при самовывозе' %}</small>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="payment_card" value="card">
+                                <label class="form-check-label" for="payment_card">
+                                    <strong>{% trans 'Картой при получении' %}</strong><br>
+                                    <small class="text-muted">{% trans 'Оплата картой курьеру или при самовывозе' %}</small>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <h5 class="mb-3">{% trans 'Комментарий к заказу' %}</h5>
+                        <div class="mb-4">
+                            <textarea class="form-control" id="comment" name="comment" rows="3" 
+                                      placeholder="{% trans 'Укажите дополнительную информацию о заказе' %}"></textarea>
+                        </div>
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="agree_terms" required>
+                            <label class="form-check-label" for="agree_terms">
+                                {% trans 'Я согласен с' %} <a href="{% url 'pages:terms' %}" target="_blank">{% trans 'условиями обработки персональных данных' %}</a> *
+                            </label>
+                            <div class="invalid-feedback">
+                                {% trans 'Вы должны принять условия обработки персональных данных' %}
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            {% trans 'Подтвердить заказ' %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans 'Ваш заказ' %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush mb-3">
+                        {% for item in cart %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <h6 class="mb-0">{{ item.product.name }}</h6>
+                                    <small class="text-muted">{{ item.quantity }} × {{ item.price }} ₽</small>
+                                </div>
+                                <span class="text-nowrap">{{ item.total_price }} ₽</span>
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="list-group-item d-flex justify-content-between px-0">
+                            <span>{% trans 'Подытог' %}</span>
+                            <span id="subtotal">{{ cart.get_total_price }} ₽</span>
+                        </div>
+                        
+                        <div class="list-group-item d-flex justify-content-between px-0" id="delivery-cost-container" style="display: none;">
+                            <span>{% trans 'Доставка' %}</span>
+                            <span id="delivery-cost">500 ₽</span>
+                        </div>
+                        
+                        <div class="list-group-item d-flex justify-content-between fw-bold px-0">
+                            <span>{% trans 'Итого' %}</span>
+                            <span id="order-total">{{ cart.get_total_price }} ₽</span>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mb-0">
+                        <small class="d-block mb-1">
+                            <i class="bi bi-info-circle me-1"></i> 
+                            {% trans 'Оплата заказа происходит после подтверждения менеджером по телефону.' %}
+                        </small>
+                        <small>
+                            <i class="bi bi-arrow-return-right me-1"></i>
+                            {% trans 'Доставка осуществляется в течение 1-2 рабочих дней.' %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body
+                    <h6 class="mb-3">{% trans 'Промокод' %}</h6>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="{% trans 'Введите промокод' %}">
+                        <button class="btn btn-outline-secondary" type="button">{% trans 'Применить' %}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Показ/скрытие поля адреса доставки
+document.querySelectorAll('input[name="delivery_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const addressField = document.getElementById('delivery-address');
+        const deliveryCostContainer = document.getElementById('delivery-cost-container');
+        const subtotal = parseFloat('{{ cart.get_total_price }}');
+        const deliveryCost = 500; // Стоимость доставки
+        
+        if (this.value === 'courier') {
+            addressField.style.display = 'block';
+            deliveryCostContainer.style.display = 'flex';
+            document.getElementById('order-total').textContent = (subtotal + deliveryCost).toFixed(2) + ' ₽';
+        } else {
+            addressField.style.display = 'none';
+            deliveryCostContainer.style.display = 'none';
+            document.getElementById('order-total').textContent = subtotal.toFixed(2) + ' ₽';
+        }
+    });
+});
+
+// Валидация формы
+(function () {
+    'use strict'
+    
+    // Получаем форму, к которой нужно применить кастомные стили валидации Bootstrap
+    var form = document.getElementById('order-form')
+    
+    // Отменяем отправку формы при невалидных данных
+    form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+        }
+        
+        form.classList.add('was-validated')
+    }, false)
+})()
+</script>
+{% endblock %}

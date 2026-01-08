@@ -1,0 +1,153 @@
+{% extends 'orders/base.html' %}
+{% load static %}
+
+{% block head_title %}Гостевое оформление заказа{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'cart:cart_detail' %}">Корзина</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Гостевое оформление</li>
+{% endblock %}
+
+{% block page_title %}Гостевое оформление заказа{% endblock %}
+
+{% block order_content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Введите ваши данные</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" id="guest-checkout-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_first_name" class="form-label">Имя *</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.first_name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_last_name" class="form-label">Фамилия *</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.last_name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">Email *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.email.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_phone" class="form-label">Телефон *</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.phone.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_address" class="form-label">Адрес доставки *</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.address.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="id_postal_code" class="form-label">Почтовый индекс *</label>
+                            {{ form.postal_code }}
+                            {% if form.postal_code.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.postal_code.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_city" class="form-label">Город *</label>
+                            {{ form.city }}
+                            {% if form.city.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.city.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_country" class="form-label">Страна *</label>
+                            {{ form.country }}
+                            {% if form.country.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.country.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Подтвердить заказ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Ваш заказ</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for item in cart %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <h6 class="my-0">{{ item.product.name }}</h6>
+                                <small class="text-muted">Количество: {{ item.quantity }} × {{ item.price }} ₽</small>
+                            </div>
+                            <span class="text-muted">{{ item.total_price }} ₽</span>
+                        </li>
+                    {% endfor %}
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span>Итого</span>
+                        <strong>{{ cart.get_total_price }} ₽</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Способы оплаты</h5>
+                <p class="card-text">Оплата наличными при получении</p>
+                <p class="card-text">Банковской картой онлайн</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Добавляем классы к полям формы
+const formFields = document.querySelectorAll('#guest-checkout-form input, #guest-checkout-form textarea, #guest-checkout-form select');
+formFields.forEach(field => {
+    field.classList.add('form-control');
+    if (field.hasAttribute('required')) {
+        field.setAttribute('placeholder', 'Обязательное поле');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'orders/base.html' %}
+{% load static %}
+
+{% block head_title %}Оплата отменена{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'orders:order_detail' order.id %}">Заказ #{{ order.id }}</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Оплата отменена</li>
+{% endblock %}
+
+{% block page_title %}Оплата отменена{% endblock %}
+
+{% block order_content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <div class="card border-0">
+            <div class="card-body p-5">
+                <div class="mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="#dc3545" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+                    </svg>
+                </div>
+                <h2 class="mb-3">Оплата отменена</h2>
+                <p class="lead mb-4">Ваш заказ #{{ order.id }} не был оплачен</p>
+                
+                <div class="alert alert-warning" role="alert">
+                    <h5 class="alert-heading">Что случилось?</h5>
+                    <p>Похоже, что процесс оплаты был прерван или отменен. Ваш заказ сохранен, но не оплачен.</p>
+                    <hr>
+                    <p class="mb-0">Вы можете повторить попытку оплаты или связаться с нашей службой поддержки, если у вас возникли вопросы.</p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-body text-start">
+                        <h5 class="card-title mb-3">Детали заказа</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Номер заказа:</strong> #{{ order.id }}</p>
+                                <p class="mb-1"><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+                                <p class="mb-0"><strong>Сумма к оплате:</strong> {{ order.get_total_cost }} ₽</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Статус заказа:</strong> {{ order.get_status_display }}</p>
+                                <p class="mb-0"><strong>Способ оплаты:</strong> {{ order.get_payment_method_display }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Вернуться в магазин
+                    </a>
+                    <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-primary">
+                        <i class="bi bi-credit-card"></i> Попробовать оплатить снова
+                    </a>
+                </div>
+                
+                <div class="mt-4">
+                    <p class="text-muted small mb-0">Если у вас возникли проблемы с оплатой, пожалуйста, свяжитесь с нашей службой поддержки.</p>
+                    <p class="text-muted small">Телефон: <a href="tel:+78001234567">8 (800) 123-45-67</a> | Email: <a href="mailto:support@coffeeshop.ru">support@coffeeshop.ru</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
