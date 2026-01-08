@@ -20,7 +20,7 @@
 
 1. Клонируйте репозиторий:
    ```bash
-   git clone https://github.com/yourusername/coffee_shop.git
+   git clone https://github.com/tooo196/coffee_shop_7_8.git
    cd coffee_shop
    ```
 
