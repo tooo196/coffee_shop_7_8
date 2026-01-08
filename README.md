@@ -20,7 +20,7 @@
 
 1. Клонируйте репозиторий:
    ```bash
-   git clone https://github.com/yourusername/coffee_shop.git
+   git clone https://github.com/tooo196/coffee_shop_7_8.git
    cd coffee_shop
    ```
 
@@ -84,13 +84,3 @@ coffee_shop/
 3. Зафиксируйте изменения (`git commit -m 'Добавлена новая функция'`)
 4. Отправьте изменения в репозиторий (`git push origin feature/НоваяФункция`)
 5. Создайте Pull Request
-
-## Лицензия
-
-Этот проект распространяется под лицензией MIT - подробности см. в файле [LICENSE](LICENSE).
-
-## Контакты
-
-Ваше Имя - ваш.email@example.com
-
-Ссылка на проект: [https://github.com/tooo196/coffee_shop](https://github.com/tooo196/coffee_shop)
