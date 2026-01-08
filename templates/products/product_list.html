@@ -1,0 +1,274 @@
+{# =============================================== #}
+{# Шаблон страницы списка товаров                   #}
+{# Наследуется от базового шаблона base.html        #}
+{# =============================================== #}
+{% extends 'base.html' %}
+{# Загрузка тегов для интернационализации и статических файлов #}
+{% load i18n static %}
+
+{# Установка заголовка страницы с учетом категории #}
+{% block title %}{% trans 'Наши товары' %}{% if category %}: {{ category.name }}{% endif %}{% endblock %}
+
+{# Основное содержимое страницы #}
+{% block content %}
+<div class="container my-5">
+    {# =============================================== #}
+    {# Хлебные крошки для навигации по сайту #}
+    {# Показывает путь от главной до текущей страницы #}
+    {# =============================================== #}
+    <nav aria-label="Хлебные крошки">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}">{% trans 'Главная' %}</a></li>
+            {% if category %}
+                <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+            {% else %}
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Все товары' %}</li>
+            {% endif %}
+        </ol>
+    </nav>
+
+    <div class="row">
+        {# =============================================== #}
+        {# Основная область с карточками товаров #}
+        {# =============================================== #}
+        <div class="col-12">
+            <div class="mb-4">
+                <h2>{% if category %}{{ category.name }}{% else %}{% trans 'Все товары' %}{% endif %}</h2>
+            </div>
+
+            {# =============================================== #}
+            {# Блок с карточками товаров #}
+            {# Адаптивная сетка: 1 колонка на мобильных, #}
+            {# 2 колонки на планшетах, 3 колонки на десктопах #}
+            {# =============================================== #}
+            {% if products %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for product in products %}
+                        <div class="col">
+                            <div class="card h-100">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                                {% else %}
+                                    <img src="{% static 'img/no-image.png' %}" class="card-img-top" alt="{% trans 'Нет изображения' %}">
+                                {% endif %}
+                                
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark">
+                                            {{ product.name }}
+                                        </a>
+                                    </h5>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="h5 mb-0">{{ product.price }} ₽</div>
+                                        
+                                        <div class="d-flex">
+                                            <form action="{% url 'cart:cart_add' product.id %}" method="post" class="add-to-cart-form">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-primary" 
+                                                        data-bs-toggle="tooltip" title="{% trans 'В корзину' %}">
+                                                    <i class="bi bi-cart-plus"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if product.in_stock %}
+                                        <span class="badge bg-success">{% trans 'В наличии' %}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{% trans 'Нет в наличии' %}</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="bi bi-star-fill text-warning"></i> 
+                                            {{ product.average_rating|default:0|floatformat:1 }}
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="bi bi-cart3"></i> {{ product.total_orders }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                {# =============================================== #}
+                {# Блок пагинации #}
+                {# Отображается, если товаров больше, чем на одной странице #}
+                {# Сохраняет параметры сортировки при переключении  #}
+                {# =============================================== #}
+                {% if is_paginated %}
+                    <nav class="mt-4" aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" 
+                                       aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                                </li>
+                            {% endif %}
+                            
+                            {% for i in paginator.page_range %}
+                                {% if page_obj.number == i %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" 
+                                       aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+                
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    {% trans 'Товары не найдены. Попробуйте изменить параметры поиска.' %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{# =============================================== #}
+{# Дополнительный JavaScript для страницы #}
+{# Подключается в конец документа #}
+{# =============================================== #}
+{% block extra_js %}
+<script>
+// Инициализация тултипов Bootstrap
+// Добавляет всплывающие подсказки к элементам с атрибутом data-bs-toggle="tooltip"
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // ===============================================
+    // Обработка добавления/удаления товаров в избранное
+    // Использует Fetch API для асинхронного обновления
+    // ===============================================
+    document.querySelectorAll('.bi-heart, .bi-heart-fill').forEach(icon => {
+        icon.addEventListener('click', function(e) {
+            // Предотвращаем стандартное поведение ссылки
+            e.preventDefault();
+            
+            // Получаем ID товара и CSRF-токен
+            const productId = this.dataset.productId;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Формируем URL для добавления в избранное
+            const url = '{% url "products:toggle_favorite" 0 %}'.replace('0', productId);
+            
+            // Отправляем асинхронный запрос на сервер
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем иконку в зависимости от статуса избранного
+                    if (data.is_favorite) {
+                        this.classList.remove('bi-heart');
+                        this.classList.add('bi-heart-fill', 'text-danger');
+                        // Показываем уведомление об успешном добавлении
+                        if (data.message) {
+                            showToast('Успех', data.message, 'success');
+                        }
+                    } else {
+                        this.classList.remove('bi-heart-fill', 'text-danger');
+                        this.classList.add('bi-heart');
+                        // Показываем уведомление об удалении из избранного
+                        if (data.message) {
+                            showToast('Информация', data.message, 'info');
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при обновлении избранного:', error);
+                showToast('Ошибка', 'Не удалось обновить избранное', 'error');
+            });
+        });
+    });
+
+    /**
+     * Показывает всплывающее уведомление
+     * @param {string} title - Заголовок уведомления
+     * @param {string} message - Текст сообщения
+     * @param {string} type - Тип уведомления (success, error, info, warning)
+     */
+    function showToast(title, message, type = 'info') {
+        // Проверяем, есть ли уже контейнер для уведомлений
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            // Создаем контейнер, если его нет
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.position = 'fixed';
+            toastContainer.style.top = '20px';
+            toastContainer.style.right = '20px';
+            toastContainer.style.zIndex = '1100';
+            document.body.appendChild(toastContainer);
+        }
+
+        // Создаем элемент уведомления
+        const toast = document.createElement('div');
+        toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+        toast.role = 'alert';
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        // Добавляем задержку перед удалением уведомления
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+
+        // Формируем содержимое уведомления
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <strong>${title}</strong><br>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+            </div>
+        `;
+
+        // Добавляем уведомление в контейнер
+        toastContainer.appendChild(toast);
+    }
+});
+</script>
+{% endblock %}

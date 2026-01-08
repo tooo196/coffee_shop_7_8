@@ -1,0 +1,584 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">{% trans 'Главная' %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}">{% trans 'Каталог' %}</a></li>
+            {% if product.category %}
+                <li class="breadcrumb-item">
+                    <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+                </li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Изображения товара -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="product-image-container">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" id="main-image">
+                    {% else %}
+                        <img src="{% static 'img/no-image.png' %}" class="card-img-top" alt="{% trans 'Нет изображения' %}" id="main-image">
+                    {% endif %}
+                    
+                    {% if product.in_stock %}
+                        <span class="badge bg-success position-absolute top-0 start-0 m-2">{% trans 'В наличии' %}</span>
+                    {% else %}
+                        <span class="badge bg-secondary position-absolute top-0 start-0 m-2">{% trans 'Нет в наличии' %}</span>
+                    {% endif %}
+                    
+                    {% if product.discount > 0 %}
+                        <span class="badge bg-danger position-absolute top-0 end-0 m-2">-{{ product.discount }}%</span>
+                    {% endif %}
+                </div>
+                
+                {% if product.images.all %}
+                    <div class="product-thumbnails d-flex flex-wrap gap-2 p-3">
+                        <div class="thumbnail {% if not product.image %}active{% endif %}" 
+                             data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/no-image.png' %}{% endif %}">
+                            <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/no-image.png' %}{% endif %}" 
+                                 class="img-thumbnail" alt="{{ product.name }}">
+                        </div>
+                        
+                        {% for image in product.images.all %}
+                            <div class="thumbnail" data-image="{{ image.image.url }}">
+                                <img src="{{ image.thumbnail.url }}" class="img-thumbnail" alt="{{ product.name }}">
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Дополнительная информация -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans 'Характеристики' %}</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            {% if product.weight %}
+                                <tr>
+                                    <th scope="row">{% trans 'Вес' %}</th>
+                                    <td>{{ product.weight }} г</td>
+                                </tr>
+                            {% endif %}
+                            {% if product.origin %}
+                                <tr>
+                                    <th scope="row">{% trans 'Страна происхождения' %}</th>
+                                    <td>{{ product.origin }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if product.roast_level %}
+                                <tr>
+                                    <th scope="row">{% trans 'Степень обжарки' %}</th>
+                                    <td>{{ product.get_roast_level_display }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if product.flavor_notes %}
+                                <tr>
+                                    <th scope="row">{% trans 'Вкусовые ноты' %}</th>
+                                    <td>{{ product.flavor_notes }}</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Информация о товаре -->
+        <div class="col-md-6">
+            <h1 class="mb-3">{{ product.name }}</h1>
+            
+            <div class="d-flex align-items-center mb-3">
+                <div class="rating me-3">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= product.average_rating|default:0|floatformat:0 %}
+                            <i class="bi bi-star-fill text-warning"></i>
+                        {% else %}
+                            <i class="bi bi-star text-secondary"></i>
+                        {% endif %}
+                    {% endfor %}
+                    <span class="ms-1">({{ product.reviews.count }} {% trans 'отзывов' %})</span>
+                </div>
+                
+                <button class="btn btn-link text-decoration-none p-0" data-bs-toggle="tooltip" 
+                        title="{% trans 'Поделиться' %}" id="share-btn">
+                    <i class="bi bi-share" style="font-size: 1.5rem;"></i>
+                </button>
+            </div>
+            
+            {% if product.discount > 0 %}
+                <div class="d-flex align-items-center mb-3">
+                    <h2 class="text-danger me-3 mb-0">{{ product.get_discounted_price }} ₽</h2>
+                    <span class="text-decoration-line-through text-muted">{{ product.price }} ₽</span>
+                    <span class="badge bg-danger ms-2">-{{ product.discount }}%</span>
+                </div>
+            {% else %}
+                <h2 class="mb-3">{{ product.price }} ₽</h2>
+            {% endif %}
+            
+            <div class="mb-4">
+                <p class="lead">{{ product.short_description }}</p>
+                <div class="product-description">
+                    {{ product.description|linebreaks }}
+                </div>
+            </div>
+            
+            <form action="{% url 'cart:cart_add' product.id %}" method="post" class="mb-4">
+                {% csrf_token %}
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="id_quantity" class="col-form-label">{% trans 'Количество' %}:</label>
+                    </div>
+                    <div class="col-auto">
+                        {{ cart_product_form.quantity }}
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary" {% if not product.in_stock %}disabled{% endif %}>
+                            <i class="bi bi-cart-plus"></i> {% if product.in_stock %}{% trans 'В корзину' %}{% else %}{% trans 'Нет в наличии' %}{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <div class="d-flex align-items-center me-3">
+                    <i class="bi bi-truck me-2"></i>
+                    <div>
+                        <div class="small">{% trans 'Бесплатная доставка' %}</div>
+                        <div class="small text-muted">{% trans 'от 2000 ₽' %}</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-arrow-return-left me-2"></i>
+                    <div>
+                        <div class="small">{% trans 'Возврат' %}</div>
+                        <div class="small text-muted">{% trans 'В течение 14 дней' %}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans 'Доставка и оплата' %}</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> {% trans 'Курьерская доставка' %}</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> {% trans 'Самовывоз из пункта выдачи' %}</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> {% trans 'Оплата при получении' %}</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i> {% trans 'Онлайн-оплата' %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Отзывы -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h4 mb-0">{% trans 'Отзывы' %}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="display-4 fw-bold">{{ product.average_rating|default:0|floatformat:1 }}</div>
+                            <div class="rating mb-2">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= product.average_rating|default:0|floatformat:0 %}
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    {% else %}
+                                        <i class="bi bi-star text-secondary"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="text-muted">{{ product.reviews.count }} {% trans 'отзывов' %}</div>
+                            
+                            {% if user.is_authenticated and not user_has_reviewed %}
+                                <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                                    <i class="bi bi-pencil-square"></i> {% trans 'Написать отзыв' %}
+                                </button>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-8">
+                            {% if product.reviews.exists %}
+                                <div class="reviews-list">
+                                    {% for review in product.reviews.all|slice:":3" %}
+                                        <div class="review-item mb-4 pb-3 border-bottom">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <h5 class="mb-0">{{ review.user.get_full_name|default:review.user.username }}</h5>
+                                                <div class="text-muted small">{{ review.created_at|date:"d.m.Y" }}</div>
+                                            </div>
+                                            <div class="rating mb-2">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= review.rating %}
+                                                        <i class="bi bi-star-fill text-warning"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-star text-secondary"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                            <p class="mb-2">{{ review.comment }}</p>
+                                            
+                                            {% if review.user == request.user %}
+                                                <div class="small">
+                                                    <a href="#" class="text-decoration-none me-2 edit-review" 
+                                                       data-review-id="{{ review.id }}" 
+                                                       data-rating="{{ review.rating }}"
+                                                       data-comment="{{ review.comment }}">
+                                                        <i class="bi bi-pencil"></i> {% trans 'Редактировать' %}
+                                                    </a>
+                                                    <a href="{% url 'products:delete_review' review.id %}" 
+                                                       class="text-decoration-none text-danger delete-review">
+                                                        <i class="bi bi-trash"></i> {% trans 'Удалить' %}
+                                                    </a>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                    
+                                    {% if product.reviews.count > 3 %}
+                                        <div class="text-center mt-3">
+                                            <a href="#all-reviews" class="btn btn-outline-primary">
+                                                {% trans 'Показать все отзывы' %} ({{ product.reviews.count }})
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="bi bi-chat-square-text display-1 text-muted mb-3"></i>
+                                    <h4>{% trans 'Пока нет отзывов' %}</h4>
+                                    <p class="text-muted">{% trans 'Будьте первым, кто оставит отзыв об этом товаре' %}</p>
+                                    
+                                    {% if user.is_authenticated %}
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                                            <i class="bi bi-pencil-square"></i> {% trans 'Написать отзыв' %}
+                                        </button>
+                                    {% else %}
+                                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary">
+                                            {% trans 'Войдите, чтобы оставить отзыв' %}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h4>Оставить отзыв</h4>
+        <form id="review-form" method="post" action="{% url 'products:add_review' product.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="rating" class="form-label">Рейтинг</label>
+                <select name="rating" id="rating" class="form-select" required>
+                    <option value="5">Отлично</option>
+                    <option value="4">Хорошо</option>
+                    <option value="3" selected>Удовлетворительно</option>
+                    <option value="2">Неудовлетворительно</option>
+                    <option value="1">Плохо</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="comment" class="form-label">Комментарий</label>
+                <textarea name="comment" id="comment" rows="3" class="form-control" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+        </form>
+    </div>
+    
+    <!-- Похожие товары -->
+    {% if similar_products %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <h2 class="mb-4">{% trans 'Похожие товары' %}</h2>
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    {% for product in similar_products %}
+                        <div class="col">
+                            {% include 'products/includes/product_card.html' with product=product %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Модальное окно для отзыва -->
+{% if user.is_authenticated %}
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviewModalLabel">{% trans 'Ваш отзыв' %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="reviewForm" method="post" action="{% url 'products:add_review' product.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <input type="hidden" name="review_id" id="reviewId" value="">
+                        
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">{% trans 'Оценка' %}</label>
+                            <div class="rating-input">
+                                {% for i in "54321" %}
+                                    <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" 
+                                           class="d-none" {% if forloop.first %}checked{% endif %}>
+                                    <label for="star{{ i }}" class="star">
+                                        <i class="bi bi-star-fill"></i>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">{% trans 'Комментарий' %}</label>
+                            <textarea class="form-control" id="comment" name="comment" rows="4" 
+                                      placeholder="{% trans 'Поделитесь своими впечатлениями о товаре' %}" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Отмена' %}</button>
+                        <button type="submit" class="btn btn-primary">{% trans 'Отправить отзыв' %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Инициализация тултипов
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+
+// Переключение изображений товара
+document.querySelectorAll('.thumbnail').forEach(thumb => {
+    thumb.addEventListener('click', function() {
+        const mainImage = document.getElementById('main-image');
+        mainImage.src = this.dataset.image;
+        
+        // Удаляем класс active у всех миниатюр
+        document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+    });
+
+    // Переключение изображений товара
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.addEventListener('click', function() {
+            const mainImage = document.getElementById('main-image');
+            mainImage.src = this.dataset.image;
+            
+            // Удаляем класс active у всех миниатюр
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+            // Добавляем класс active к выбранной миниатюре
+            this.classList.add('active');
+        document.querySelectorAll('.star').forEach(s => {
+            const sRating = s.getAttribute('for').replace('star', '');
+            if (sRating <= rating) {
+                s.classList.add('active');
+            } else {
+                s.classList.remove('active');
+            }
+        });
+    });
+});
+
+// Добавление отзыва
+document.getElementById('review-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',  // To identify AJAX requests
+            'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Handle successful submission
+                alert('Спасибо за ваш отзыв!');
+                form.reset();
+                // Optionally, update the reviews section without reloading
+                window.location.reload(); // Or use JavaScript to update the UI
+            } else {
+                // Handle errors
+                alert('Произошла ошибка: ' + (data.error || 'Пожалуйста, проверьте введенные данные.'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при отправке отзыва.');
+        });
+});
+
+// Редактирование отзыва
+document.querySelectorAll('.edit-review').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const reviewId = this.dataset.reviewId;
+        const rating = this.dataset.rating;
+        const comment = this.dataset.comment;
+        
+        document.getElementById('reviewId').value = reviewId;
+        document.getElementById('comment').value = comment;
+        
+        // Устанавливаем рейтинг
+        document.querySelector(`.rating-input input[value="${rating}"]`).checked = true;
+        document.querySelectorAll('.star').forEach(star => {
+            const sRating = star.getAttribute('for').replace('star', '');
+            if (sRating <= rating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
+        
+        // Показываем модальное окно
+        const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+        modal.show();
+    });
+});
+
+// Подтверждение удаления отзыва
+document.querySelectorAll('.delete-review').forEach(link => {
+    link.addEventListener('click', function(e) {
+        if (!confirm('{% trans 'Вы уверены, что хотите удалить отзыв?' %}')) {
+            e.preventDefault();
+        }
+    });
+});
+
+// Поделиться товаром
+document.getElementById('share-btn').addEventListener('click', function() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ product.name }}',
+            text: '{{ product.short_description }}',
+            url: window.location.href,
+        })
+        .catch(error => console.log('Ошибка при использовании Web Share API:', error));
+    } else {
+        // Копируем ссылку в буфер обмена
+        navigator.clipboard.writeText(window.location.href);
+        
+        // Показываем уведомление
+        const tooltip = new bootstrap.Tooltip(this, {
+            title: '{% trans 'Ссылка скопирована!' %}',
+            trigger: 'manual'
+        });
+        tooltip.show();
+        
+        setTimeout(() => {
+            tooltip.hide();
+            tooltip.dispose();
+        }, 2000);
+    }
+});
+</script>
+
+<style>
+/* Стили для рейтинга */
+.rating {
+    color: #ffc107;
+    font-size: 1.25rem;
+}
+
+.rating-input {
+    direction: rtl;
+    unicode-bidi: bidi-override;
+    text-align: left;
+}
+
+.rating-input input[type="radio"] {
+    display: none;
+}
+
+.rating-input label {
+    display: inline-block;
+    color: #ddd;
+    cursor: pointer;
+    font-size: 1.5rem;
+    margin-right: 0.25rem;
+    transition: color 0.2s;
+}
+
+.rating-input label:hover,
+.rating-input label:hover ~ label,
+.rating-input input[type="radio"]:checked ~ label {
+    color: #ffc107;
+}
+
+/* Стили для миниатюр товара */
+.thumbnail {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    width: 60px;
+    height: 60px;
+    overflow: hidden;
+}
+
+.thumbnail:hover,
+.thumbnail.active {
+    opacity: 1;
+    border-color: #0d6efd !important;
+}
+
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Стили для кнопки "Поделиться" */
+#share-btn {
+    color: #6c757d;
+    transition: color 0.2s;
+}
+
+#share-btn:hover {
+    color: #0d6efd;
+}
+
+/* Адаптивные стили */
+@media (max-width: 767.98px) {
+    .product-thumbnails {
+        justify-content: center;
+    }
+    
+    .thumbnail {
+        width: 50px;
+        height: 50px;
+    }
+}
+</style>
+{% endblock %}

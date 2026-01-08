@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans 'Результаты поиска' %}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}">{% trans 'Главная' %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% trans 'Результаты поиска' %}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">{% trans 'Результаты поиска' %}</h1>
+            
+            <div class="search-info mb-4">
+                <p class="lead">
+                    {% if query %}
+                        {% blocktrans with query=query count=page_obj.paginator.count %}
+                            По запросу "{{ query }}" найдено {{ count }} товаров
+                        {% endblocktrans %}
+                    {% else %}
+                        {% trans 'Вы не указали поисковый запрос' %}
+                    {% endif %}
+                </p>
+                
+                {% if suggestions %}
+                    <div class="suggestions mt-3">
+                        <p class="mb-2">{% trans 'Возможно, вы искали:' %}</p>
+                        <ul class="list-inline">
+                            {% for suggestion in suggestions %}
+                                <li class="list-inline-item me-2 mb-2">
+                                    <a href="{% url 'products:search' %}?q={{ suggestion|urlencode }}" 
+                                       class="badge bg-light text-dark text-decoration-none">
+                                        {{ suggestion }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if products %}
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    {% for product in products %}
+                        <div class="col">
+                            <div class="card h-100">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                                {% else %}
+                                    <img src="{% static 'img/no-image.png' %}" class="card-img-top" alt="{% trans 'Нет изображения' %}">
+                                {% endif %}
+                                
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark">
+                                            {{ product.name }}
+                                        </a>
+                                    </h5>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="h5 mb-0">{{ product.price }} ₽</div>
+                                        
+                                        <form action="{% url 'cart:cart_add' product.id %}" method="post" class="add-to-cart-form">
+                                            {% csrf_token %}
+                                            {{ cart_product_form }}
+                                            <button type="submit" class="btn btn-sm btn-primary" 
+                                                    data-bs-toggle="tooltip" title="{% trans 'В корзину' %}">
+                                                <i class="bi bi-cart-plus"></i>
+                                            </button>
+                                        </form>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if product.in_stock %}
+                                        <span class="badge bg-success">{% trans 'В наличии' %}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{% trans 'Нет в наличии' %}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Пагинация -->
+                {% if is_paginated %}
+                    <nav class="mt-4" aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}" 
+                                       aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                                </li>
+                            {% endif %}
+                            
+                            {% for i in paginator.page_range %}
+                                {% if page_obj.number == i %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?q={{ query }}&page={{ i }}">{{ i }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}" 
+                                       aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+                
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-search display-1 text-muted mb-3"></i>
+                    <h3>{% trans 'Ничего не найдено' %}</h3>
+                    <p class="lead">{% trans 'Попробуйте изменить поисковый запрос' %}</p>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'products:product_list' %}" class="btn btn-primary">
+                            <i class="bi bi-arrow-left"></i> {% trans 'Вернуться в каталог' %}
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Инициализация тултипов
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+
+// Обработка добавления в избранное
+document.querySelectorAll('.bi-heart, .bi-heart-fill').forEach(icon => {
+    icon.addEventListener('click', function(e) {
+        e.preventDefault();
+        const productId = this.dataset.productId;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch('{% url "products:toggle_favorite" 0 %}'.replace('0', productId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.is_favorite) {
+                    this.classList.remove('bi-heart');
+                    this.classList.add('bi-heart-fill', 'text-danger');
+                } else {
+                    this.classList.remove('bi-heart-fill', 'text-danger');
+                    this.classList.add('bi-heart');
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
