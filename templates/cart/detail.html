@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Your Shopping Cart</h1>
+    
+    {% if cart|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Remove</th>
+                        <th>Unit Price</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart %}
+                        {% with product=item.product %}
+                            <tr>
+                                <td>
+                                    <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                                                 class="img-thumbnail me-2" style="max-width: 50px;">
+                                        {% endif %}
+                                        {{ product.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <form action="{% url 'cart:cart_update' product.id %}" method="post" class="d-inline">
+                                        {{ item.update_quantity_form.quantity }}
+                                        {{ item.update_quantity_form.override }}
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary ms-2">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                        </button>
+                                        {% csrf_token %}
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="{% url 'cart:cart_remove' product.id %}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        {% csrf_token %}
+                                    </form>
+                                </td>
+                                <td>${{ item.price }}</td>
+                                <td>${{ item.total_price }}</td>
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    <tr class="table-light">
+                        <td colspan="4" class="text-end fw-bold">Total</td>
+                        <td class="fw-bold">${{ cart.get_total_price }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-chevron-left"></i> Continue Shopping
+            </a>
+            <div>
+                <a href="{% url 'cart:cart_clear' %}" class="btn btn-outline-danger me-2">
+                    <i class="bi bi-trash"></i> Clear Cart
+                </a>
+                <a href="{% url 'orders:order_create' %}" class="btn btn-primary">
+                    Proceed to Checkout <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-cart-x" style="font-size: 3rem; color: #6c757d;"></i>
+            <h2 class="mt-3">Your cart is empty</h2>
+            <p class="text-muted">Looks like you haven't added any products to your cart yet.</p>
+            <a href="{% url 'products:product_list' %}" class="btn btn-primary mt-3">
+                <i class="bi bi-arrow-left"></i> Continue Shopping
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add quantity controls
+const quantityInputs = document.querySelectorAll('.quantity-input');
+quantityInputs.forEach(input => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'input-group input-group-sm';
+    wrapper.style.width = '120px';
+    
+    const minusBtn = document.createElement('button');
+    minusBtn.className = 'btn btn-outline-secondary';
+    minusBtn.type = 'button';
+    minusBtn.innerHTML = '<i class="bi bi-dash"></i>';
+    
+    const plusBtn = document.createElement('button');
+    plusBtn.className = 'btn btn-outline-secondary';
+    plusBtn.type = 'button';
+    plusBtn.innerHTML = '<i class="bi bi-plus"></i>';
+    
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(minusBtn);
+    wrapper.appendChild(input);
+    wrapper.appendChild(plusBtn);
+    
+    minusBtn.addEventListener('click', () => {
+        if (input.value > 1) {
+            input.value = parseInt(input.value) - 1;
+        }
+    });
+    
+    plusBtn.addEventListener('click', () => {
+        input.value = parseInt(input.value) + 1;
+    });
+});
+</script>
+{% endblock %}
